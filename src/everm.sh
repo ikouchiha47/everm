@@ -30,7 +30,6 @@ function get_emacs {
 
     tempfile=`mktemp`
     wget "$FTP_URL/$1.tar.gz" -O $tempfile
-    mkdir -p "$EMACS_DIR/$1"
     tar xf $tempfile -C "$EMACS_DIR/$1" 
   else
     echo "emacs version already exists"
