@@ -32,36 +32,40 @@ function grape {
 function get_list_of_avaiable_emacs {
   echo "fetching avaiable versions"
 
-  wget -qO- "$FTP_URL/" | grape -o '(emacs-\d\d\.\d\w?).tar.gz"' | sed 's/.tar.gz"//' > "$EVERM_DIR/.emacs_versions"
+  wget -qO- "$FTP_URL/" | grape '(emacs-\d\d\.\d\w?).tar.gz"' | sed 's/.tar.gz"//' > "$EVERM_DIR/.emacs_versions"
 }
 
 function get_emacs {
   if [ ! -d "$EMACS_DIR/$1" ]; then
-    echo "getting your emacs from internet"
+    echo "getting your emacs from interweb"
 
     tempfile=`mktemp`
-    wget "$FTP_URL/$1.tar.gz" -O $tempfile
-    tar -xvzf $tempfile -C "$EMACS_DIR/$1" 
+
+    if wget "$FTP_URL/$1.tar.gz" -O $tempfile
+    then
+      mkdir -p "$EMACS_DIR/$1"
+      tar -xvzf $tempfile --strip 1 -C "$EMACS_DIR/$1" 
+    else
+      echo "failed to fetch file from interweb"
+      exit 1
+    fi
   else
     echo "emacs version already exists"
   fi
 
   if [ ! -d "$EMACS_DIR/$1/emacs" ]; then
-    #install_emacs "$1"
-    echo "hah"
+    install_emacs "$EMACS_DIR/$1"
   else
     echo "$1 is already installed, to uninstall run rm -rf $EMACS_DIR/$1/*"
   fi 
 }
 
 function install_emacs {
-  dir_path="$EMACS_DIR/$1"
-  
-  cd $dir_path
-  mkdir -p "$dir_path/emacs"
-  mkdir -p "$dir_path/bin"
+  cd $1
+  mkdir -p "$1/emacs"
+  mkdir -p "$1/bin"
 
-  ./configure --prefix="$dir_path/emacs" --binddir="$dir_path/bin"
+  ./configure --prefix="$1/emacs" --bindir="$1/bin" --with-gif=no
   make && make install
 }
 
