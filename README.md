@@ -1,5 +1,4 @@
 #everm
--------
 
 An experimental emacs version manager.
 
