@@ -18,10 +18,21 @@ fi
 
 command="$1"
 
+function grape {
+  if [ "$(uname)" == "Darwin" ]; then
+    egrep -o "$1"
+  elif [ "$(expr substr $(uname -s) 1 5)" == "Linux" ]; then
+    grep -oP "$1"
+  else
+    echo "add your grep utility and send PR"
+    exit 1
+  fi
+}
+
 function get_list_of_avaiable_emacs {
   echo "fetching avaiable versions"
 
-  wget -qO- "$FTP_URL/" | egrep -o '(emacs-\d\d\.\d\w?).tar.gz"' | sed 's/.tar.gz"//' > "$EVERM_DIR/.emacs_versions"
+  wget -qO- "$FTP_URL/" | grape -o '(emacs-\d\d\.\d\w?).tar.gz"' | sed 's/.tar.gz"//' > "$EVERM_DIR/.emacs_versions"
 }
 
 function get_emacs {
