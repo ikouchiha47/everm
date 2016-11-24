@@ -30,13 +30,14 @@ function get_emacs {
 
     tempfile=`mktemp`
     wget "$FTP_URL/$1.tar.gz" -O $tempfile
-    tar xf $tempfile -C "$EMACS_DIR/$1" 
+    tar -xvzf $tempfile -C "$EMACS_DIR/$1" 
   else
     echo "emacs version already exists"
   fi
 
   if [ ! -d "$EMACS_DIR/$1/emacs" ]; then
-    install_emacs "$1"
+    #install_emacs "$1"
+    echo "hah"
   else
     echo "$1 is already installed, to uninstall run rm -rf $EMACS_DIR/$1/*"
   fi 
