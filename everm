@@ -88,7 +88,7 @@ function write_emacs_version {
 
 function export_shim_path {
     if [ "$PATH" != *":$EMACS_SHIM:"* ]; then
-        echo "export PATH=$EMACS_SHIM:$PATH" > "$HOME/.bashrc"
+        echo "export PATH=$EMACS_SHIM:$PATH" >> "$HOME/.bashrc"
         echo "added emacs shim to PATH variable in bashrc"
         echo "if using any other shell, set PATH=$EMACS_SHIM:$PATH"
 
