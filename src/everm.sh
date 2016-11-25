@@ -74,9 +74,7 @@ function make_shim_emacs {
 }
 
 function write_emacs_version {
-    if [ ! -f "$HOME/.emacsrc" ]; then
-        echo "$2" > "$HOME/.emacsrc"
-    fi
+    echo "$1" > "$HOME/.emacsrc"
 }
 
 function export_shim_path {
@@ -106,7 +104,7 @@ elif [ "$command" == "install" ]; then
     fi
 elif [ "$command" == "use" ]; then
     if [ -d "$EMACS_DIR/$2" ]; then
-        write_emacs_version "$2"
+        write_emacs_version $2
         make_shim_emacs
         export_shim_path
     else

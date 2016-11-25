@@ -2,14 +2,13 @@
 #This is emacs shim
 
 EVERM_DIR="$HOME/.everm"
-EMACS_VERSION_FILE="$HOME/.emacs_version"
+EMACS_VERSION_FILE="$HOME/.emacsrc"
 
-echo "$EMACS_VERSION"
-
-if [ -z "$EMACS_VERSION" ]; then
+if [ ! -z "$EMACS_VERSION" ]; then
     emacsdir="$EVERM_DIR/versions/$EMACS_VERSION/bin" 
 elif [ -f "$EMACS_VERSION_FILE" ]; then
-    emacsversion=$(<$EMACS_VERSION_FILE)
+    emacsversion=$(cat $EMACS_VERSION_FILE)
+    echo "$emacsversion 25.1"
     emacsdir="$EVERM_DIR/versions/$emacsversion/bin"
 else
     echo "please use everm use emacs-<version> or echo \"emacs-VERSION\" > $EMACS_VERSION_FILE"
