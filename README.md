@@ -16,6 +16,8 @@ An experimental emacs version manager.
 - if successfull save emacs-VERSION to `~/.everm/versions` and create a folder in `emacs-VERSION/emacs/.emacs.d` 
 - if `~/.everm` is not in $PATH, add it to the front `export PATH="$HOME/.everm/:$PATH"`
 
+*fun fact: in mac emacs.app is created in $EMACS_DIR/nextstep*
+
 #### Using
 - read the version name from command line `everm use emacs-24.5`
 - checks if its present in install directory, then create a `~/.everm/versions` file.

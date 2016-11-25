@@ -29,6 +29,15 @@ function grape {
     fi
 }
 
+function configure_emacs {
+    if [ "$(uname)" == "Darwin" ]; then
+        ./configure --prefix="$1/emacs" --bindir="$1/bin" --with-x=no --with-dbus=no
+    elif [ "$(expr substr $(uname -s) 1 5)" == "Linux" ]; then
+        ./configure --prefix="$1/emacs" --bindir="$1/bin" --with-gif=no
+    else
+        ./configure
+    fi
+}
 function get_list_of_avaiable_emacs {
     echo "fetching avaiable versions"
 
@@ -65,7 +74,7 @@ function install_emacs {
     mkdir -p "$1/emacs"
     mkdir -p "$1/bin"
 
-    ./configure --prefix="$1/emacs" --bindir="$1/bin" --with-gif=no
+    configure_emacs $1 
     make && make install
 }
 
