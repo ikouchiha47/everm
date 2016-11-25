@@ -5,6 +5,15 @@ An experimental emacs version manager.
 ### Platforms
 - Linux
 - Mac OSX (maybe)
+
+### Pre-Install
+- check the `src/packages` directory and install the required libraries for building emacs. (presently has support for debian, fedora and OS X)
+
+### Running
+- ./everm list
+- ./everm install emacs-<VERSION>
+- ./everm use emacs-<VERSION>
+- emacs &
  
 ### How it works
 
