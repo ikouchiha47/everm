@@ -53,7 +53,8 @@ function get_emacs {
         if wget "$FTP_URL/$1.tar.gz" -O $tempfile
         then
             mkdir -p "$EMACS_DIR/$1"
-            tar -xvzf $tempfile --strip 1 -C "$EMACS_DIR/$1" 
+            tar -xvzf $tempfile --strip 1 -C "$EMACS_DIR/$1"
+            rm -f "$tempfile" 
         else
             echo "failed to fetch file from interweb"
             exit 1
