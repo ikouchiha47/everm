@@ -7,84 +7,111 @@ EMACS_SHIM="$EVERM_DIR/shim"
 FTP_URL="https://ftp.gnu.org/gnu/emacs"
 
 if [ ! -d "$EVERM_DIR" ]; then
-  echo "making directories"
+    echo "making directories"
 
-  mkdir -p "$EVERM_DIR"
-  mkdir -p "$EMACS_DIR"
-  mkdir -p "$EMACS_SHIM"
-  
-  echo "one time setup completed"
+    mkdir -p "$EVERM_DIR"
+    mkdir -p "$EMACS_DIR"
+    mkdir -p "$EMACS_SHIM"
+
+    echo "one time setup completed"
 fi
 
 command="$1"
 
 function grape {
-  if [ "$(uname)" == "Darwin" ]; then
-    egrep -o "$1"
-  elif [ "$(expr substr $(uname -s) 1 5)" == "Linux" ]; then
-    grep -oP "$1"
-  else
-    echo "add your grep utility and send PR"
-    exit 1
-  fi
+    if [ "$(uname)" == "Darwin" ]; then
+        egrep -o "$1"
+    elif [ "$(expr substr $(uname -s) 1 5)" == "Linux" ]; then
+        grep -oP "$1"
+    else
+        echo "add your grep utility and send PR"
+        exit 1
+    fi
 }
 
 function get_list_of_avaiable_emacs {
-  echo "fetching avaiable versions"
+    echo "fetching avaiable versions"
 
-  wget -qO- "$FTP_URL/" | grape '(emacs-\d\d\.\d\w?).tar.gz"' | sed 's/.tar.gz"//' > "$EVERM_DIR/.emacs_versions"
+    wget -qO- "$FTP_URL/" | grape '(emacs-\d\d\.\d\w?).tar.gz"' | sed 's/.tar.gz"//' > "$EVERM_DIR/.emacs_versions"
 }
 
 function get_emacs {
-  if [ ! -d "$EMACS_DIR/$1" ]; then
-    echo "getting your emacs from interweb"
+    if [ ! -d "$EMACS_DIR/$1" ]; then
+        echo "getting your emacs from interweb"
 
-    tempfile=`mktemp`
+        tempfile=`mktemp`
 
-    if wget "$FTP_URL/$1.tar.gz" -O $tempfile
-    then
-      mkdir -p "$EMACS_DIR/$1"
-      tar -xvzf $tempfile --strip 1 -C "$EMACS_DIR/$1" 
+        if wget "$FTP_URL/$1.tar.gz" -O $tempfile
+        then
+            mkdir -p "$EMACS_DIR/$1"
+            tar -xvzf $tempfile --strip 1 -C "$EMACS_DIR/$1" 
+        else
+            echo "failed to fetch file from interweb"
+            exit 1
+        fi
     else
-      echo "failed to fetch file from interweb"
-      exit 1
+        echo "emacs version already exists"
     fi
-  else
-    echo "emacs version already exists"
-  fi
 
-  if [ ! -d "$EMACS_DIR/$1/emacs" ]; then
-    install_emacs "$EMACS_DIR/$1"
-  else
-    echo "$1 is already installed, to uninstall run rm -rf $EMACS_DIR/$1/*"
-  fi 
+    if [ ! -f "$EMACS_DIR/$1/bin/emacs" ]; then
+        install_emacs "$EMACS_DIR/$1"
+    else
+        echo "$1 is already installed, to uninstall run rm -rf $EMACS_DIR/$1/bin/*"
+    fi 
 }
 
 function install_emacs {
-  cd $1
-  mkdir -p "$1/emacs"
-  mkdir -p "$1/bin"
+    cd $1
+    mkdir -p "$1/emacs"
+    mkdir -p "$1/bin"
 
-  ./configure --prefix="$1/emacs" --bindir="$1/bin" --with-gif=no
-  make && make install
+    ./configure --prefix="$1/emacs" --bindir="$1/bin" --with-gif=no
+    make && make install
+}
+
+function make_shim_emacs {
+    cp "$PWD/src/emacs" "$EMACS_SHIM"  
+}
+
+function write_emacs_version {
+    if [ ! -f "$HOME/.emacsrc" ]; then
+        echo "$2" > "$HOME/.emacsrc"
+    fi
+}
+
+function export_shim_path {
+    if [ "$PATH" != *":$EMACS_SHIM:"* ]; then
+        echo "export PATH=$EMACS_SHIM:$PATH" > "$HOME/.bashrc"
+        echo "added emacs shim to PATH variable in bashrc"
+        echo "if using any other shell, set PATH=$EMACS_SHIM:$PATH"
+
+    fi
 }
 
 if [ "$command" == "list" ]; then
-  get_list_of_avaiable_emacs
-  filename="$EVERM_DIR/.emacs_versions"
+    get_list_of_avaiable_emacs
+    filename="$EVERM_DIR/.emacs_versions"
 
-  echo "$(<$filename)"
+    echo "$(<$filename)"
 
 elif [ "$command" == "install" ]; then
-  if [ ! -f "$EVERM_DIR/.emacs_versions" ]; then
-    get_list_of_avaiable_emacs
-  fi
+    if [ ! -f "$EVERM_DIR/.emacs_versions" ]; then
+        get_list_of_avaiable_emacs
+    fi
 
-  result=`cat "$EVERM_DIR/.emacs_versions" | egrep -oc "$2"`
+    result=`cat "$EVERM_DIR/.emacs_versions" | egrep -oc "$2"`
 
-  if [ $result -gt 0 ]; then
-    get_emacs $2
-  fi
+    if [ $result -gt 0 ]; then
+        get_emacs $2
+    fi
+elif [ "$command" == "use" ]; then
+    if [ -d "$EMACS_DIR/$2" ]; then
+        write_emacs_version "$2"
+        make_shim_emacs
+        export_shim_path
+    else
+        echo "please install emacs with everm install emacs-version"
+    fi
 fi
 
 exit $?

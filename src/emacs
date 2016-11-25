@@ -1,0 +1,21 @@
+#!/bin/bash
+#This is emacs shim
+
+EVERM_DIR="$HOME/.everm"
+EMACS_VERSION_FILE="$HOME/.emacs_version"
+
+echo "$EMACS_VERSION"
+
+if [ -z "$EMACS_VERSION" ]; then
+    emacsdir="$EVERM_DIR/versions/$EMACS_VERSION/bin" 
+elif [ -f "$EMACS_VERSION_FILE" ]; then
+    emacsversion=$(<$EMACS_VERSION_FILE)
+    emacsdir="$EVERM_DIR/versions/$emacsversion/bin"
+else
+    echo "please use everm use emacs-<version> or echo \"emacs-VERSION\" > $EMACS_VERSION_FILE"
+    exit 1
+fi
+    
+HOME="$emacsdir" "$emacsdir/emacs"
+
+
