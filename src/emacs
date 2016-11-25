@@ -4,17 +4,22 @@
 EVERM_DIR="$HOME/.everm"
 EMACS_VERSION_FILE="$HOME/.emacsrc"
 
-if [ ! -z "$EMACS_VERSION" ]; then
-    emacsdir="$EVERM_DIR/versions/$EMACS_VERSION/bin" 
-elif [ -f "$EMACS_VERSION_FILE" ]; then
+if [ -f "$EMACS_VERSION_FILE" ]; then
     emacsversion=$(cat $EMACS_VERSION_FILE)
-    echo "$emacsversion 25.1"
-    emacsdir="$EVERM_DIR/versions/$emacsversion/bin"
+    
+    if [ "$(uname)" == "Darwin" ]; then
+        emacsdir="$EVERM_DIR/versions/$emacsversion/nextstep"
+    elif [ "$(expr substr $(uname -s) 1 5)" == "Linux" ]; then
+        emacsdir="$EVERM_DIR/versions/$emacsversion/bin"
+    fi
 else
     echo "please use everm use emacs-<version> or echo \"emacs-VERSION\" > $EMACS_VERSION_FILE"
     exit 1
 fi
     
-HOME="$emacsdir" "$emacsdir/emacs"
-
+if [ "$(uname)" == "Darwin" ]; then
+  HOME="$emacsdir" open "$emacsdir/Emacs.app" 
+elif [ "$(expr substr $(uname -s) 1 5)" == "Linux" ]; then
+  HOME="$emacsdir" "$emacsdir/emacs"
+fi
 
