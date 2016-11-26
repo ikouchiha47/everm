@@ -27,12 +27,9 @@
 
 *fun fact: in mac Emacs.app is created in $EMACS_DIR/nextstep*
 
-#### Using
-- read the version name from command line `evt use emacs-24.5`
-
 ### TODO:
 [ ] Add pre-build scripts in `packages/` directory, or write a package manager
 
 ### Known Issue:
-- emacs-24.5 build failure in fedora
-
+- emacs-24.5 and emacs-23.1 build failure in fedora
+- And if there are issue like `recipie for target src failed, make Error[2]`, then I have nothing to do`
