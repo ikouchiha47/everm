@@ -1,15 +1,15 @@
 #!/bin/bash
 #This is emacs shim
 
-EVERM_DIR="$HOME/.everm"
+EVERM_DIR="$HOME/.evt"
 EMACS_VERSION_FILE="$HOME/.emacsrc"
 
-if [ -f "$EMACS_VERSION_FILE" ]; then
+if [[ -f $EMACS_VERSION_FILE ]]; then
     emacsversion=$(cat $EMACS_VERSION_FILE)
     
-    if [ "$(uname)" == "Darwin" ]; then
+    if [[ "$(uname)" == "Darwin" ]]; then
         emacsdir="$EVERM_DIR/versions/$emacsversion/nextstep"
-    elif [ "$(expr substr $(uname -s) 1 5)" == "Linux" ]; then
+    elif [[ "$(expr substr $(uname -s) 1 5)" == "Linux" ]]; then
         emacsdir="$EVERM_DIR/versions/$emacsversion/bin"
     fi
 else
@@ -17,9 +17,9 @@ else
     exit 1
 fi
     
-if [ "$(uname)" == "Darwin" ]; then
+if [[ "$(uname)" == "Darwin" ]]; then
   HOME="$emacsdir" open "$emacsdir/Emacs.app" 
-elif [ "$(expr substr $(uname -s) 1 5)" == "Linux" ]; then
+elif [[ "$(expr substr $(uname -s) 1 5)" == "Linux" ]]; then
   HOME="$emacsdir" "$emacsdir/emacs"
 fi
 

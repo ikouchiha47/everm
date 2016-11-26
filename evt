@@ -5,6 +5,7 @@ EVERM_DIR="$HOME/.evt"
 EMACS_DIR="$EVERM_DIR/versions"
 EMACS_SHIM="$EVERM_DIR/shim"
 FTP_URL="https://ftp.gnu.org/gnu/emacs"
+CONFIGURE_PREFIX="--prefix=%s --bindir=%s"
 
 if [ ! -d "$EVERM_DIR" ]; then
     echo "making directories"
@@ -19,9 +20,9 @@ fi
 command="$1"
 
 function grape {
-    if [ "$(uname)" == "Darwin" ]; then
+    if [[ "$(uname)" == "Darwin" ]]; then
         egrep -o "$1"
-    elif [ "$(expr substr $(uname -s) 1 5)" == "Linux" ]; then
+    elif [[ "$(expr substr $(uname -s) 1 5)" == "Linux" ]]; then
         grep -oP "$1"
     else
         echo "add your grep utility and send PR"
@@ -29,11 +30,19 @@ function grape {
     fi
 }
 
+function build_prefix {
+    printf -v prefix_string " $CONFIGURE_PREFIX " "$EMACS_DIR/$1/emacs" "$EMACS_DIR/$1/bin"
+    shift 1
+    echo "$prefix_string $@"
+}
+
 function configure_emacs {
-    if [ "$(uname)" == "Darwin" ]; then
-        ./configure --prefix="$1/emacs" --bindir="$1/bin" --with-x=no --with-dbus=no
-    elif [ "$(expr substr $(uname -s) 1 5)" == "Linux" ]; then
-        ./configure --prefix="$1/emacs" --bindir="$1/bin" --with-gif=no
+    configure_prefix=$(build_prefix $@)
+
+    if [[ "$(uname)" == "Darwin" ]]; then
+        ./configure "$configure_prefix"
+    elif [[ "$(expr substr $(uname -s) 1 5)" == "Linux" ]]; then
+        ./configure $configure_prefix --with-gif=no
     else
         ./configure
     fi
@@ -45,7 +54,7 @@ function get_list_of_avaiable_emacs {
 }
 
 function get_emacs {
-    if [ ! -d "$EMACS_DIR/$1" ]; then
+    if [[ ! -d "$EMACS_DIR/$1" ]]; then
         echo "getting your emacs from interweb"
 
         tempfile=`mktemp`
@@ -63,19 +72,21 @@ function get_emacs {
         echo "emacs version already exists"
     fi
 
-    if [ ! -f "$EMACS_DIR/$1/bin/emacs" ]; then
-        install_emacs "$EMACS_DIR/$1"
+    if [[ ! -f "$EMACS_DIR/$1/bin/emacs" ]]; then
+        install_emacs $@
     else
         echo "$1 is already installed, to uninstall run rm -rf $EMACS_DIR/$1/bin/*"
     fi 
 }
 
 function install_emacs {
-    cd $1
-    mkdir -p "$1/emacs"
-    mkdir -p "$1/bin"
+    instal_dir="$EMACS_DIR/$1"
 
-    configure_emacs $1 
+    cd $instal_dir
+    mkdir -p "$instal_dir/emacs"
+    mkdir -p "$instal_dir/bin"
+
+    configure_emacs $@ 
     make && make install
 }
 
@@ -88,32 +99,33 @@ function write_emacs_version {
 }
 
 function export_shim_path {
-    if [ "$PATH" != *":$EMACS_SHIM:"* ]; then
-        echo "export PATH=$EMACS_SHIM:$PATH" >> "$HOME/.bashrc"
+    if [[ $PATH != *"$EMACS_SHIM:"* ]]; then
+        echo "export PATH=\"$EMACS_SHIM:\$PATH\"" >> "$HOME/.bashrc"
         echo "added emacs shim to PATH variable in bashrc"
-        echo "if using any other shell, set PATH=$EMACS_SHIM:$PATH"
+        echo "if using any other shell, set PATH=$EMACS_SHIM:\$PATH"
 
     fi
 }
 
-if [ "$command" == "list" ]; then
+if [[ $command == "list" ]]; then
     get_list_of_avaiable_emacs
     filename="$EVERM_DIR/.emacs_versions"
 
     echo "$(<$filename)"
 
-elif [ "$command" == "install" ]; then
-    if [ ! -f "$EVERM_DIR/.emacs_versions" ]; then
+elif [[ $command == "install" ]]; then
+    if [[ ! -f "$EVERM_DIR/.emacs_versions" ]]; then
         get_list_of_avaiable_emacs
     fi
 
     result=`cat "$EVERM_DIR/.emacs_versions" | egrep -oc "$2"`
 
-    if [ $result -gt 0 ]; then
-        get_emacs $2
+    if [[ $result -gt 0 ]]; then
+        shift 1
+        get_emacs $@
     fi
-elif [ "$command" == "use" ]; then
-    if [ -d "$EMACS_DIR/$2" ]; then
+elif [[ $command == "use" ]]; then
+    if [[ -d "$EMACS_DIR/$2" ]]; then
         write_emacs_version $2
         make_shim_emacs
         export_shim_path
